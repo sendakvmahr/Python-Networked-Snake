@@ -4,13 +4,22 @@ import hashlib
 import time
 import socket
 import parsing
+import database_handler
 
 PORT = 11000
-LOCK = threading.Lock()
-BUFFER_SIZE = 1024 # If a message is bigger... I don't have a handler for that atm...Figure out if the states get that big
-UNIDENTIFIED_CLIENTS = []
-IDENTIFIED_CLIENTS = []
+# I'm not sure if I'll need this later, we'll see
+# LOCK = threading.Lock()
+
+# If a message is bigger... I don't have a handler for that atm...Figure out if messages get that big
+BUFFER_SIZE = 1024
+
+# This is a mess
+
+# Spectators, mainly
+UNIDENTIFIED_CLIENTS = {}
+
 CLIENTS = {}
+
 
 class Client(threading.Thread):
     def __init__(self, socket, address):
@@ -18,31 +27,57 @@ class Client(threading.Thread):
         self.socket = socket
         self.address = address
         self.message = ""
+        self.logged_in = False
         self.start()
-
+        
+    def _handle_login(self, username, password):
+        db = database_handler.Database_Connection("users.db")
+        authenticated = db.authenticate_user(username, password)
+        response = ""
+        if (username in CLIENTS.keys()):
+            response = "FAILURE: USER ALREADY LOGGED IN"
+        elif (authenticated):
+            response = "SUCCESS"
+            self.logged_in = True
+            CLIENTS[username] = self.socket
+        else:
+            response = "FAILURE: WRONG PASSWORD OR USERNAME"
+        return response
+    
+    def _handle_create(self, username, password):
+        db = database_handler.Database_Connection("users.db")
+        authenticated = db.authenticate_user(username, password)
+        response = ""
+        could_create = db.create_user(username, password)
+        if (could_create):
+            response = "USER CREATED AND LOGGED IN"
+            self.logged_in = True
+            CLIENTS[username] = self.socket
+        else:
+            response = "FAILURE: COULD NOT CREATE USER"
+        return response
+        
     def run(self):
-        """My brain is dead right now, "overwrites" the Thread run function"""
+        """My brain is dead right now, "overwrites" the Thread run function so it knows how to run"""
         while True:
-            if (self.socket in UNIDENTIFIED_CLIENTS):
+            if (self.socket in UNIDENTIFIED_CLIENTS.keys()):
                 # Handshake is done
-                # Either login / create / spectate
                 data = parsing.parse_message_from_client(self.socket.recv((BUFFER_SIZE)))
+                response = ""
                 if (data.startswith("login")):
                     userinfo = data.strip().split("\t")[1:]
-                    print("LOGIN: ", userinfo)
+                    response = self._handle_login(userinfo[0], userinfo[1])
+                    print("LOGIN " + response + ": ", userinfo)
                 elif (data.startswith("create")):
                     userinfo = data.strip().split("\t")[1:]
-                    print("CREATE: ", userinfo)
+                    response = self._handle_create(userinfo[0], userinfo[1])
+                    print("CREATE " + response + ": ", userinfo)
                 else:
-                    # things that are left to implement - spectate, error 
+                    # things that are left to implement - spectate, error
                     pass
-                # Echo for now
-                self.socket.send(parsing.process_message_for_client(data))
-                print("UNIDENTIFIED CLIENT SENT: ", data)
-                print("REPLIED : ", data)
-                
-                print(UNIDENTIFIED_CLIENTS)
-            elif (self.socket in IDENTIFIED_CLIENTS):
+                self.socket.send(parsing.process_message_for_client(response))
+                print("REPLIED : ", response)
+            elif (self.logged_in):
                 # User has finished handshake and logged in
                 # Either join / change movement
                 pass
@@ -54,7 +89,7 @@ class Client(threading.Thread):
                     self.socket.send(response)
                     self.message = ""
                     print("END HANDSHAKE")
-                    UNIDENTIFIED_CLIENTS.append(self.socket)
+                    UNIDENTIFIED_CLIENTS[self.socket] = ""
                 else:
                     self.message += self.socket.recv((BUFFER_SIZE)).decode()
             
@@ -64,7 +99,6 @@ class Server:
         self._server_socket = socket.socket()
         self._port = port
         self._server_socket.bind(("127.0.0.1", self._port))
-        self.lock = threading.Lock()
 
     def start(self):
         print("SERVER STARTED")
@@ -74,6 +108,7 @@ class Server:
             new_client = Client(clientsocket, address)
             
 
+# Shouldn't this be in parser...? it feels like it should be but things would have to be renamed
 def create_handshake_resp(handshake):
     # Some string that is used everywhere for this
     specificationGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"

@@ -15,8 +15,9 @@ class Database_Connection():
     def create_user(self, username, password):
         try:
             self._execute_command("insert into user(name, password, win, game) values (?, ?, ?, ?)", (username, password, 0, 0))
+            return True
         except sqlite3.IntegrityError:
-            return False;
+            return False
 
     def print_database(self):
         results = self._execute_command('SELECT * FROM user', tuple())
@@ -29,6 +30,10 @@ class Database_Connection():
         result = [r for r in cursor]
         cursor.close()
         return result
+
+    def __exit__(self):
+        self.db.close()
+    
 
 # For Testing
 if (__name__ == "__main__"):
