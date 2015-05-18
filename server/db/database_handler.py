@@ -5,36 +5,40 @@ class Database_Connection():
         self.db = sqlite3.connect(db_name)
         
     def user_in_db(self, username):
-        cursor = self.db.cursor()
-        cursor.execute('SELECT * FROM user WHERE name="?"', username)
-        print(cursor)
-        return False
+        results = self._execute_command('SELECT * FROM user WHERE name=?', (username,))
+        return len(results) != 0
 
     def authenticate_user(self, username, password):
-        return False
+        results = self._execute_command('SELECT name, password FROM user WHERE name=? AND password=?', (username, password))
+        return len(results) != 0
 
     def create_user(self, username, password):
-        return False
+        try:
+            self._execute_command("insert into user(name, password, win, game) values (?, ?, ?, ?)", (username, password, 0, 0))
+        except sqlite3.IntegrityError:
+            return False;
 
     def print_database(self):
-        print("Please implement me")
+        results = self._execute_command('SELECT * FROM user', tuple())
+        for r in results:
+            print("Name: {}\t Pw: {}\t Win: {}\t Games: {}\t".format(r[0], r[1], r[2], r[3]))
+
+    def _execute_command(self, command, args):
+        cursor = self.db.cursor()
+        cursor.execute(command, args)
+        result = [r for r in cursor]
+        cursor.close()
+        return result
 
 # For Testing
 if (__name__ == "__main__"):
-    db = Database_Connection("users_test.db")
-    print(db.user_in_db("test"))
-"""
-user(name TEXT, password TEXT, win INT, game INT, PRIMARY KEY(name))
-"""
-
-"""
-t = ('IBM',)
-c.execute('select * from stocks where symbol=?', t)
-
-# Larger example
-for t in [('2006-03-28', 'BUY', 'IBM', 1000, 45.00),
-          ('2006-04-05', 'BUY', 'MSFT', 1000, 72.00),
-          ('2006-04-06', 'SELL', 'IBM', 500, 53.00),
-         ]:
-    c.execute('insert into stocks values (?,?,?,?,?)', t)
-"""
+    db = Database_Connection(":memory:")
+    # Also schema for db
+    db.db.execute("create table user(name TEXT, password TEXT, win INT, game INT, PRIMARY KEY(name))")
+    db.create_user("test", "test")
+    db.create_user("ouroboros", "tiamat")
+    assert(db.user_in_db("test"))
+    assert(not db.user_in_db("wertizoo"))
+    assert(db.authenticate_user("test", "test"))
+    assert(not db.authenticate_user("test", "wrong"))
+    db.print_database()
