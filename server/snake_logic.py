@@ -1,52 +1,6 @@
-"""
-drawSnake = where to draw the snake head
-snakeHeads = Probably to use seperate image but there's no other pic atm
-drawFood = where to draw the food
-score - ...oh shoot I should label which player corresponds to which score
-{  
-   "drawSnakes":[  
-      [  
-         50,
-         50
-      ],
-      [  
-         40,
-         50
-      ],
-      [  
-         80,
-         80
-      ]
-   ],
-   "snakeHeads":{  
-      "player1":[  
-         50,
-         50
-      ],
-      "player2":[  
-         80,
-         80
-      ]
-   },
-   "drawFood":[  
-      30,
-      30
-   ],
-   "player":"",
-   "score":[  
-      0,
-      0
-   ]
-}
-
-displayHeight: 500,
-displayWidth: 750,
-fps: 30,
-interval: 1000/fps,
-borderColor: "#FFFFFF",
-backgroundColor: "#000000"
-"""
-# Width and height are set in client
+# Width and height are set in client, just remember to change it here too if I change it
+import random
+import json # not sure if that should be done here atm
 
 WIDTH = 750
 HEIGHT = 500
@@ -55,9 +9,6 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 UP = (0, -1)
 DOWN = (0, 1)
-
-import random
-import json # not sure if that should be done here atm
 
 def to_nearest_tile(x):
     base_tile = int(x/STEP_SIZE)
@@ -70,17 +21,21 @@ class Snake():
         self.tail = []
         self.player = player
         self.direction = ()
-        self.update_direction(direction)
         self.ate = False
+        self.update_direction(direction)
     def update(self):
         if (self.ate):
+            # If it grew, add an extra tail piece. Doesn't matter where the tail is initialized,
+            # It will move to the right place before collision checking is done
             self.tail.append([0,0])
             self.ate = False
         if (len(self.tail) > 0):
+            # Take out the coordinate corresponding to the last tail bit, 
+            # stick a new coordinate where the head is
             self.tail.pop()
             self.tail.insert(0, list(self.head))
+        # Move the head 
         self.head = [self.head[0] + STEP_SIZE * self.direction[0], self.head[1] + STEP_SIZE * self.direction[1]]
-        # change tails
     def update_direction(self, direction):
         if (direction == "r"):
             self.direction = RIGHT
@@ -119,6 +74,7 @@ class Game_State():
             snake.update()
             tails += snake.get_draw_tails()
         # Check to see if snake heads are in anything
+        # Really lazy collision detection - everything is done in multiples of 10
         for snake in self.players.values():
             head = snake.get_head()
             if ((head in tails)) or (self.in_wall(head)):
@@ -128,25 +84,30 @@ class Game_State():
                 snake.ate = True
                 self.food.pop()
         for snake in dead_snakes:
+            # Delete dead players
             del self.players[snake]
         if (len(self.food) == 0):
             self.spawn_food()
         if (len(self.players) == 1):
+            # Last one staying wins
             self.finished = True
             
     def in_wall(self, head):
         x_collide = head[0] == 0 or head[0] == WIDTH
         y_collide = head[1] == 0 or head[1] == HEIGHT
         return x_collide or y_collide
+
     def update_player_direction(self, player, direction):
         self.players[player].update_direction(direction)
+
     def spawn_food(self):
         # Extra calculations involving STEP_SIZE prevent food from spawning in borders
         food_x = to_nearest_tile(random.randint(STEP_SIZE, WIDTH - STEP_SIZE * 2))
         food_y = to_nearest_tile(random.randint(STEP_SIZE, HEIGHT - STEP_SIZE * 2))
         self.food.append([food_x, food_y])
+
     def to_JSON(self):
-        # Probably can't just fart this out into a json, gonna need more vars
+        # Should be in another module in the future
         drawSnakes = []
         snakeHeads = {}
         score = {}
@@ -164,7 +125,7 @@ class Game_State():
 
 
 if (__name__ == "__main__"):
-    
+    # Used pygame for visuals to make sure logic worked
     import pygame, sys
     #pygame.init()
     clock = pygame.time.Clock()

@@ -1,6 +1,9 @@
 # Module that handles the encoding and decoding and reading that JS's
 # WebSocket insists on using
 
+import base64
+import hashlib
+
 def process_message_for_client(message):
     # Start with 129 to say it is a text message
     result = [129]
@@ -34,7 +37,7 @@ def parse_message_from_client(message):
         # Message is text
         pass
     elif (byte_list[0] == 136):
-        # I think, not sure
+        # Client D/C. Will handle later,  most likely raise a custom error
         print("Error on the client side") 
     else:
         print(message)
@@ -73,6 +76,25 @@ def parse_message_from_client(message):
         counter += 1
 
     return result
+
+def create_handshake_resp(handshake):
+    # Some string that is used everywhere for this
+    specificationGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+    websocketKey = ''
+
+    # Parsing handshake request
+    lines = handshake.splitlines()
+    for line in lines:
+            args = line.partition(": ")
+            if args[0] == 'Sec-WebSocket-Key':
+                    websocketKey = args[2]
+                    
+    concatenate_keys = (websocketKey + specificationGUID).encode()
+    full_key = hashlib.sha1(concatenate_keys).digest()
+    accept_key = base64.b64encode(full_key)
+    accept_key_string = accept_key.decode()
+
+    return 'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ' + accept_key_string + '\r\n\r\n'
 
 if (__name__ == "__main__"):
     # Testing
