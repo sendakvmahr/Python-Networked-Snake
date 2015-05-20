@@ -72,8 +72,8 @@ class Client(threading.Thread):
                     userinfo = data.strip().split("\t")[1:]
                     response = self._handle_create(userinfo[0], userinfo[1])
                     print("CREATE " + response + ": ", userinfo)
-                else:
-                    # things that are left to implement - spectate, error
+                else: 
+                   # things that are left to implement - spectate, error
                     pass
                 self.socket.send(parsing.process_message_for_client(response))
                 print("REPLIED : ", response)

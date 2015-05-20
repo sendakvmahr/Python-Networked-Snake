@@ -15,6 +15,7 @@ function()
 
     GameState.prototype.load = function(messageFromServer) {
         var test = JSON.stringify(this);
+        console.log(test);
         // var newState = JSON.parse(messageFromServer);
         var newState = JSON.parse(test);
         this.drawSnakes = newState.drawSnakes;
