@@ -3,8 +3,39 @@ import time
 import socket
 import parsing
 import database_handler
+import snake_logic
 
+# 1/FPS instead of 1000/FPS 'cause sleep takes time input in seconds
+FPS = 30
+SLEEP = 1/FPS
 BUFFER_SIZE = 1024
+
+class Networked_Game(threading.Thread):
+    def __init__(self, name, num_players):
+        threading.Thread.__init__(self)
+        self.name = name
+        self.started = False
+        self.num_players = num_players
+        # self.players[player_name] = player_socket
+        self.players = {}
+        self._game_state = ""
+        
+    def run(self):
+        # This needs to stop when the game is over
+        while True:
+            self._game_state.update()
+            update = self._game_state.to_JSON()
+            update = parsing.process_message_for_client(update)
+            for player in self.players.keys():
+                self.players[player].send(update)
+            time.sleep(SLEEP)
+            
+    def join(self, player_name, socket):
+        self.players[player_name] = socket
+        if (self.num_players == len(self.players)):
+            self._game_state = snake_logic.Game_State([p for p in self.players.keys()])
+            self.start()
+        print("{}.started = {}".format(self.name, self.started))
 
 class Client(threading.Thread):
     def __init__(self, socket, address):
@@ -12,6 +43,7 @@ class Client(threading.Thread):
         self.socket = socket
         self.address = address
         self._game = ""
+        self._username = ""
         self.message = ""
         self.logged_in = False
         self.start()
@@ -19,32 +51,55 @@ class Client(threading.Thread):
     def run(self):
         """Overwrites the Thread run function so it knows how to run"""
         while True:
+            ### NOTES ON WHAT IS NOT IMPLEMENTED
+            # logged in - processing moves, though that has more to do wiht the client atm
+            # anyone - disconnections
+            # spectate option
+            # request_games shouldn't be there, server should update everyone on the state of the games when they change
             if (self.logged_in):
                 # User has finished handshake and logged in
                 # Either join / change movement / create game
                 data = self._read_data()
                 response = ""
+                if (data.startswith("create")):
+                    data = self._split_message(data)
+                    game_name = data[0]
+                    num_players = int(data[1])
+                    SERVER.add_game(game_name, num_players)
+                    SERVER.join(game_name, self._username, self.socket)
+                elif (data.startswith("move")):
+                    #self._game.update_player_direction(self._user, self._split_message(data)[0])
+                    pass
+                elif (data.startswith("join")):
+                    game_name = self._split_message(data)[0]
+                    SERVER.join(game_name, self._username, self.socket)
+                elif (data.startswith("request_games")):
+                    response = SERVER.games.items()
+                    
             elif (self.socket in SERVER.clients.keys()):
                 # Handshake is done
                 data = self._read_data()
                 response = ""
                 if (data.startswith("login")):
-                    userinfo = data.strip().split("\t")[1:]
+                    userinfo = self._split_message(data)
                     response = self._handle_login(userinfo[0], userinfo[1])
                     print("LOGIN " + response + ": ", userinfo)
                 elif (data.startswith("create")):
-                    userinfo = data.strip().split("\t")[1:]
+                    userinfo = self._split_message(data)
                     response = self._handle_create(userinfo[0], userinfo[1])
                     print("CREATE " + response + ": ", userinfo)
-                else: 
+                elif (data.startswith("request_games")):
+                    response = SERVER.games.items()
                     # things that are left to implement - spectate, error
-                    # spectate is not important for current milestone, it can wait
-                    pass
                 self._send(response)
                 print("REPLIED : ", response)
             else:
                 # Initial handshake
                 self._handle_handshake()
+
+    def _split_message(self, message):
+        # Takes out the first part of the response, leaves the "arguments" for the client
+        return message.strip().split("\t")[1:]
 
     def _send(self, message):
         self.socket.send(parsing.process_message_for_client(message))
@@ -56,10 +111,11 @@ class Client(threading.Thread):
         db = database_handler.Database_Connection("users.db")
         authenticated = db.authenticate_user(username, password)
         response = ""
-        if (username in CLIENTS.keys()):
+        if (username in SERVER.clients):
             response = "FAILURE: USER ALREADY LOGGED IN"
         elif (authenticated):
             response = "SUCCESS : USER LOGGED IN"
+            self._username = username
             self.logged_in = True
         else:
             response = "FAILURE: WRONG PASSWORD OR USERNAME"
@@ -73,6 +129,7 @@ class Client(threading.Thread):
         if (could_create):
             response = "SUCCESS : USER CREATED AND LOGGED IN"
             self.logged_in = True
+            self._username = username
         else:
             response = "FAILURE: COULD NOT CREATE USER"
         return response
@@ -87,18 +144,6 @@ class Client(threading.Thread):
         else:
             self.message += self.socket.recv((BUFFER_SIZE)).decode()
 
-
-    
-PORT = 11000
-
-# If a message is bigger... I don't have a handler for that atm...Figure out if messages get that big
-
-# Spectators and players who have not logged in
-UNIDENTIFIED_CLIENTS = {}
-
-# clients[game] = socket
-CLIENTS = {}
-
 class Server:
     def __init__(self, port):
         self._server_socket = socket.socket()
@@ -111,6 +156,8 @@ class Server:
         # Difference between clients that are signed in and aren't don't matter to the server - 
         # that is handled by the socket + thread watching each connection to the client
         # self.games[game_name] = networked_version_of_game
+
+        # !!!!! I have a feeling there needs to be a threading lock on self.games and self.clients soon...
         self.games = {}
 
     def start(self):
@@ -120,8 +167,13 @@ class Server:
             clientsocket, address = self._server_socket.accept()
             new_client = Client(clientsocket, address)
         
-    def add_game(self, num_players):
-        pass
+    def add_game(self, game_name, num_players):
+        if (game_name not in self.games.keys()):
+            self.games[game_name] = Networked_Game(game_name, num_players)
+        
+    def join(self, game_name, username, socket):
+        self.games[game_name].join(username, socket)
+        
 
 if (__name__ == "__main__"):
     SERVER = Server(11000)

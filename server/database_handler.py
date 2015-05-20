@@ -15,6 +15,7 @@ class Database_Connection():
     def create_user(self, username, password):
         try:
             self._execute_command("insert into user(name, password, win, game) values (?, ?, ?, ?)", (username, password, 0, 0))
+            self.db.commit()
             return True
         except sqlite3.IntegrityError:
             return False
@@ -32,11 +33,13 @@ class Database_Connection():
         return result
 
     def __exit__(self):
+        self.db.commit()
         self.db.close()
     
 
 # For Testing
 if (__name__ == "__main__"):
+    """
     db = Database_Connection(":memory:")
     # Also schema for db
     db.db.execute("create table user(name TEXT, password TEXT, win INT, game INT, PRIMARY KEY(name))")
@@ -46,4 +49,9 @@ if (__name__ == "__main__"):
     assert(not db.user_in_db("wertizoo"))
     assert(db.authenticate_user("test", "test"))
     assert(not db.authenticate_user("test", "wrong"))
+    db.print_database()
+    """
+    db = Database_Connection("users.db")
+    #db.create_user("test2", "test")
+    
     db.print_database()

@@ -16,9 +16,8 @@ $(function() {
         console.log(ip);
         connection = new Connection(ip, "11000");
         console.log(connection);
-        // Should trigger spectator state, if can implement in time
     });
-
+    
     $("#login-button").on("click", function(event){
         try {
             console.log("Logging in");
@@ -42,6 +41,14 @@ $(function() {
             console.log(error);
         }
     });
+    
+    // functions I've been using in the console that should be attatched to buttons
+    /*
+    connection.send("create:\tnewgame\t2")
+    connection.send("create:\tnewgame2\t3")
+    connection.send("join:\tnewgame")
+    */
+    
     // Load all the images
     var loaded = 0;
     var numImages = imageNames.length;
