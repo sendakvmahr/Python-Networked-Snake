@@ -9,15 +9,6 @@ function(Vector, Button, MainScene, InputHandler, goody, vars)
         this.connection = "";
         this.input = new InputHandler.InputHandler(connection); 
         this.ctx = this.canvas.getContext('2d');
-        /*
-        this.scene = new MainScene.MainScene(
-            [new Button.Button(images.food, 
-                new Vector.Vector(520, 200), 
-                function() {}
-            )], 
-            [images.snake]
-        );
-        */
         this.scene = new MainScene.MainScene();
         this.resizeCanvas();  
     };
@@ -31,6 +22,7 @@ function(Vector, Button, MainScene, InputHandler, goody, vars)
         this.input.update(event, this.scene);
         // Change to connection
         // sending
+        // this.connection
     }; 
     
     mainLoop.prototype.updateFromServer = function(gameStateObject) {

@@ -14,39 +14,43 @@ function(Vector)
     InputHandler.prototype.update = function(event, scene) {
         switch(event.type) {
             case "mousemove":
-                this.mousePosition.x = event.offsetX;
-                this.mousePosition.y = event.offsetY;
+                //this.mousePosition.x = event.offsetX;
+                //this.mousePosition.y = event.offsetY;
                 break;
             case "click":
-                scene.click(this.mousePosition);
+                //scene.click(this.mousePosition);
                 break;
             case "contextmenu":
-                scene.rightClick(this.mousePosition);
+                //scene.rightClick(this.mousePosition);
                 break;
             default: // keyup or keydown
                 switch(event.which) {
                     case 87: // w up
                         this.up = event.type === "keydown";
                         if (this.up) {
-                            console.log("up");
+                            //console.log("dir:\tu");
+                            this.connection.send("dir:\tu");
                         }
                         break;
                     case 65: // a left
                         this.left = event.type === "keydown";
                         if (this.left) {
-                            console.log("left");
+                            //console.log("dir:\tl");
+                            this.connection.send("dir:\tl");
                         }
                         break;
                     case 83: // s down
                         this.down = event.type === "keydown";
                         if (this.down) {
-                            console.log("down");
+                            //console.log("dir:\td");
+                            this.connection.send("dir:\td");
                         }
                         break;
                     case 68: // d right
                         this.right = event.type === "keydown";
                         if (this.right) {
-                            console.log("right");
+                            this.connection.send("dir:\tr");
+                            //console.log("dir:\tr");
                         }
                         break;
                 }

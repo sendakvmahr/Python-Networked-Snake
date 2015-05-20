@@ -25,7 +25,7 @@ class Networked_Game(threading.Thread):
         while True:
             self._game_state.update()
             update = self._game_state.to_JSON()
-            print(update)
+            #print(update)
             update = parsing.process_message_for_client(update)
             for player in self.players.keys():
                 self.players[player].send(update)
@@ -37,6 +37,8 @@ class Networked_Game(threading.Thread):
             self._game_state = snake_logic.Game_State([p for p in self.players.keys()])
             self.start()
         print("{}.started = {}".format(self.name, self.started))
+    def update_player_direction(self, username, direction):
+        self._game_state.update_player_direction(username, direction)
 
 class Client(threading.Thread):
     def __init__(self, socket, address):
@@ -69,12 +71,15 @@ class Client(threading.Thread):
                     num_players = int(data[1])
                     SERVER.add_game(game_name, num_players)
                     SERVER.join(game_name, self._username, self.socket)
-                elif (data.startswith("move")):
-                    #self._game.update_player_direction(self._user, self._split_message(data)[0])
+                    self._game = SERVER.games[game_name]
+                elif (data.startswith("dir")):
+                    print(self._split_message(data)[0], self._username)
+                    self._game.update_player_direction(self._username, self._split_message(data)[0])
                     pass
                 elif (data.startswith("join")):
                     game_name = self._split_message(data)[0]
                     SERVER.join(game_name, self._username, self.socket)
+                    self._game = SERVER.games[game_name]
                 elif (data.startswith("request_games")):
                     response = SERVER.games.items()
                     

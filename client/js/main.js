@@ -6,6 +6,7 @@ function start(connection) {
         function resize() { main.resizeCanvas(); }
         function ev(event) { main.updateInput(event); }
         
+        console.log(main.updateInput);
         var $canvas = $("#canvas");
         $canvas.bind("contextmenu mousemove click", ev);
 

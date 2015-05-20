@@ -11,6 +11,7 @@ function(GameState, vars)
 
     MainScene.prototype.update = function(input, delta) {
         /*
+        atually not called
         for (var i = 0; i < this.buttons.length; i++) { 
             if (this.buttons[i].contains(input.mousePosition)) {
                 this.buttons[i].hover = true; // need a place where this is set to false
