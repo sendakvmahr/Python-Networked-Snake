@@ -37,7 +37,9 @@ class Snake():
         else:
             self.direction = Snake.down
     def get_draw_tails(self):
-        return list(tuple(t) for t in self.tail)
+        result = list(tuple(t) for t in self.tail)
+        result.append(tuple(self.get_head()))
+        return result
     def get_head(self):
         return list(self.head)
     
@@ -112,10 +114,11 @@ class Game_State():
         snakeHeads = {}
         score = {}
         for snake in self.players.values():
-            tails = snake.get_draw_tails(),
-            drawSnakes += tails,
-            snakeHeads[snake.player] = snake.get_head(),
-            score[snake.player] = len(tails)
+            tails = snake.get_draw_tails()
+            drawSnakes += tails
+            snakeHeads[snake.player] = snake.get_head()
+            score[snake.player] = len(tails)-1
+            # tails -1 b/c snake counts as a drawHead
         
         return json.dumps({"drawSnakes" : drawSnakes,
                            "snakeHeads" : snakeHeads,

@@ -85,7 +85,26 @@
                 float: right;
                 margin-right: .7rem;
             }
-
+            
+            #join {
+                float: left;
+                height: 100%;
+                background: cyan;
+            }
+            
+            #join input[type=text]{
+                display: block;
+                margin: 10px;
+            }
+            
+            #create-game-button{
+                float: left;
+                margin-left: .7rem;
+            }
+            #join-game-button{
+                float: right;
+                margin-right: .7rem;
+            }
 
         </style>
     </header> 
@@ -107,6 +126,12 @@
                 <input id="password" type="text" placeholder="password" value="test"></input>
                 <input id="login-button" type="button" value="Login"></input>
                 <input id="create-button" type="button" value="Create"></input>
+            </form>
+            <form id="join">
+                <input id="game_name" type="text" placeholder="name of game" value="newgame"></input>
+                <input id="player_num" type="text" placeholder="Number of Players" value="2"></input>
+                <input id="create-game-button" type="button" value="Create"></input>
+                <input id="join-game-button" type="button" value="Join"></input>
             </form>
         </div>
     </body>

@@ -25,8 +25,20 @@ function start(connection) {
         var currentTime = 0;
         var timeDelta = 0;
 
-        function start(connection) {
+        function start(connection) {    
+            connection.socket.onmessage = function(evt) { 
+                try {
+                    gameState = JSON.parse(evt.data);
+                    //console.log(gameState)
+                    main.updateFromServer(gameState);
+                    main.draw();
+                }
+                catch(err) {
+                    console.log(err)
+                }
+            };
             // should pass connection socket
+            /*
             window.requestAnimationFrame(start);
             currentTime = (new Date()).getTime();
             timeDelta = currentTime - lastTime;
@@ -36,8 +48,8 @@ function start(connection) {
                 timeDelta = 0;           
                 lastTime = currentTime;
             }
-            main.draw();
+            */
         }
-        start();
+        start(connection);
     });
 }

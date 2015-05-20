@@ -7,7 +7,7 @@ import snake_logic
 
 # 1/FPS instead of 1000/FPS 'cause sleep takes time input in seconds
 FPS = 30
-SLEEP = 1/FPS
+SLEEP = 3/FPS
 BUFFER_SIZE = 1024
 
 class Networked_Game(threading.Thread):
@@ -25,6 +25,7 @@ class Networked_Game(threading.Thread):
         while True:
             self._game_state.update()
             update = self._game_state.to_JSON()
+            print(update)
             update = parsing.process_message_for_client(update)
             for player in self.players.keys():
                 self.players[player].send(update)
@@ -61,6 +62,7 @@ class Client(threading.Thread):
                 # Either join / change movement / create game
                 data = self._read_data()
                 response = ""
+                print(data)
                 if (data.startswith("create")):
                     data = self._split_message(data)
                     game_name = data[0]

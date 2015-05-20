@@ -47,7 +47,6 @@ function(GameState, vars)
         // Background
         ctx.fillStyle = vars.backgroundColor;
         ctx.fillRect(0, 0, vars.displayWidth, vars.displayHeight);
-        
         // Snakes
         for (var i = 0; i < this.gameState.drawSnakes.length; i++) {
             this.drawImage(images.snake, this.gameState.drawSnakes[i][0], this.gameState.drawSnakes[i][1], ctx);

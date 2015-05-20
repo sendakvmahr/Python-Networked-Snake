@@ -13,14 +13,15 @@ $(function() {
         // Just connects to the server - ideally, this would be automatic, but
         // I do not have a static IP so this has to be manually done
         ip = $("#ip-field").val();
-        console.log(ip);
+        //console.log(ip);
         connection = new Connection(ip, "11000");
-        console.log(connection);
+        //console.log(connection);
+        
     });
     
     $("#login-button").on("click", function(event){
         try {
-            console.log("Logging in");
+            //console.log("Logging in");
             username = $("#username").val();
             var password = $("#password").val();
             connection.send("login:\t" + username + "\t" + password + "\n");
@@ -42,8 +43,42 @@ $(function() {
         }
     });
     
+    $("#create-game-button").on("click", function(event){
+        try {
+            console.log("Creating game");
+            var game = $("#game_name").val();
+            var num_players = $("#player_num").val().toString();
+            connection.send("create:\t" + game + "\t" + num_players);
+        }
+        catch(error) {
+            console.log(error);
+        }
+    });
+    
+    $("#join-game-button").on("click", function(event){
+        try {
+            console.log("Joining game");
+            var game = $("#game_name").val();
+            connection.send("join:\t" + game);
+        }
+        catch(error) {
+            console.log(error);
+        }
+    });
+    
+    
     // functions I've been using in the console that should be attatched to buttons
     /*
+    
+    
+                #create-game-button{
+                float: left;
+                margin-left: .7rem;
+            }
+            #join-game-button{
+                float: right;
+                margin-right: .7rem;
+            }
     connection.send("create:\tnewgame\t2")
     connection.send("create:\tnewgame2\t3")
     connection.send("join:\tnewgame")

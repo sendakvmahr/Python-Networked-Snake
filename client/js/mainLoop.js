@@ -1,11 +1,12 @@
 define(["physics/Vector", "input/Button", "scene/MainScene", "input/InputHandler","lib/goody", "assets/vars"],
 function(Vector, Button, MainScene, InputHandler, goody, vars)
 {
-    function mainLoop(connection) {
+    function mainLoop() {
         this.canvas = document.getElementById('canvas');
         this.canvas.width = vars.displayWidth;
         this.canvas.height = vars.displayHeight;
-        this.connection = connection;
+        // Assign in main.js
+        this.connection = "";
         this.input = new InputHandler.InputHandler(connection); 
         this.ctx = this.canvas.getContext('2d');
         /*
@@ -18,7 +19,6 @@ function(Vector, Button, MainScene, InputHandler, goody, vars)
         );
         */
         this.scene = new MainScene.MainScene();
-        this.scene.loadScene("test");
         this.resizeCanvas();  
     };
     
@@ -33,10 +33,8 @@ function(Vector, Button, MainScene, InputHandler, goody, vars)
         // sending
     }; 
     
-    mainLoop.prototype.updateFromServer = function(event) {
-        // try reading fully from connection, if 
-        // there's something there, eat it and update, 
-        // if not, do nothing
+    mainLoop.prototype.updateFromServer = function(gameStateObject) {
+        this.scene.loadScene(gameStateObject);
     }
     
     mainLoop.prototype.draw = function() {
@@ -44,10 +42,12 @@ function(Vector, Button, MainScene, InputHandler, goody, vars)
     };
     
     mainLoop.prototype.update = function() {
+        /*
         if (this.scene.switchScenes) {
             this.scene = this.scene.nextScene();
         }
         this.scene.update(this.input);
+        */
     };
     
     return {
