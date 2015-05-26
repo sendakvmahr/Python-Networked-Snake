@@ -77,7 +77,7 @@ class Game_State():
                 if ((head in tails)) or (self.in_wall(head)):
                     # Snake hit a tail or wall, is dead
                     dead_snakes.append(snake.player)
-                elif (head == self.food[0]):
+                elif (head in self.food):
                     snake.ate = True
                     self.food.pop()
             for snake in dead_snakes:
@@ -130,9 +130,9 @@ class Game_State():
 if (__name__ == "__main__"):
     # Used pygame for visuals to make sure logic worked
     import pygame, sys
-    #pygame.init()
+    pygame.init()
     clock = pygame.time.Clock()
-    #py_display = pygame.display.set_mode([Game_State.width, Game_State.height])
+    py_display = pygame.display.set_mode([Game_State.width, Game_State.height])
     #gs = Game_State(["player1", "player2", "player3", "player4"])
     gs = Game_State(["player1", "player2"])
     #gs = Game_State(["player1"])
@@ -150,8 +150,7 @@ if (__name__ == "__main__"):
         pygame.display.flip()
     gs.update()
     print(gs.to_JSON())
-        
-    """
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -179,7 +178,6 @@ if (__name__ == "__main__"):
         gs.update()
         display(gs)
         clock.tick(16)
-        """
-
+    
 
 

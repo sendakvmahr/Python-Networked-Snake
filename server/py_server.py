@@ -6,8 +6,9 @@ import database_handler
 import snake_logic
 
 # 1/FPS instead of 1000/FPS 'cause sleep takes time input in seconds
-FPS = 30
-SLEEP = 3/FPS
+# OMG slow down the message rate and do prediction haha...
+FPS = 15
+SLEEP = 1/FPS
 BUFFER_SIZE = 1024
 
 class Networked_Game(threading.Thread):
@@ -73,9 +74,7 @@ class Client(threading.Thread):
                     SERVER.join(game_name, self._username, self.socket)
                     self._game = SERVER.games[game_name]
                 elif (data.startswith("dir")):
-                    print(self._split_message(data)[0], self._username)
                     self._game.update_player_direction(self._username, self._split_message(data)[0])
-                    pass
                 elif (data.startswith("join")):
                     game_name = self._split_message(data)[0]
                     SERVER.join(game_name, self._username, self.socket)
@@ -155,7 +154,8 @@ class Server:
     def __init__(self, port):
         self._server_socket = socket.socket()
         self.port = port
-        self._server_socket.bind(("127.0.0.1", self.port))
+        #self._server_socket.bind(("127.0.0.1", self.port))
+        self._server_socket.bind(("0.0.0.0", self.port))
         self.clients = {}
         # self.clients[client_socket] = game_client_is_watching
         # if client is not watching a game, then game_client_is_watching is an empty string
