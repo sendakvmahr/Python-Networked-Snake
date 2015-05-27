@@ -4,6 +4,9 @@
 import base64
 import hashlib
 
+class DisconnectionError(Exception):
+    pass
+
 def process_message_for_client(message):
     # Start with 129 to say it is a text message
     result = [129]
@@ -38,7 +41,7 @@ def parse_message_from_client(message):
         pass
     elif (byte_list[0] == 136):
         # Client D/C. Will handle later,  most likely raise a custom error
-        print("Error on the client side") 
+        return "D/C"
     else:
         print(message)
         raise TypeError("Some other kind of message was received, number={}".format(byte_list[0]))

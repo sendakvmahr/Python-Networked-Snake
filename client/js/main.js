@@ -28,28 +28,27 @@ function start(connection) {
 
         function start(connection) {    
             connection.socket.onmessage = function(evt) { 
+                console.log(evt.data);
+                if (evt.data.startsWith("GAMES")) {
+                    var data = evt.data.replace("\t", ":").replace("[", "").replace("]", "");
+                    $("#info").html(data);
+                }
+                else if (evt.data.startsWith("SCORES")) {
+                    var data = evt.data.replace("\t", ":<br/>").replace("[", "").replace("]", "").replace("\n", "<br/>");
+                    $("#info").html(data);
+                }
                 try {
-                    gameState = JSON.parse(evt.data);
-                    //console.log(gameState)
-                    main.updateFromServer(gameState);
-                    main.draw();
+                    if (evt.data[0] == "{") {
+                        gameState = JSON.parse(evt.data);
+                        //console.log(gameState)
+                        main.updateFromServer(gameState);
+                        main.draw();
+                    }
                 }
                 catch(err) {
                     console.log(err)
                 }
             };
-            // should pass connection socket
-            /*
-            window.requestAnimationFrame(start);
-            currentTime = (new Date()).getTime();
-            timeDelta = currentTime - lastTime;
-            if (timeDelta > vars.interval) 
-            {
-                main.update(); 
-                timeDelta = 0;           
-                lastTime = currentTime;
-            }
-            */
         }
         start(connection);
     });

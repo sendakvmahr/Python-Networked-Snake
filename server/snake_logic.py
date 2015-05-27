@@ -62,6 +62,7 @@ class Game_State():
             self.players[players[3]] = Snake(players[2], self.to_nearest_tile(Game_State.width/2), self.to_nearest_tile(Game_State.height*3/4), "d")
         self.food = []
         self.spawn_food()
+
     def update(self):
         if not (self.finished):
             dead_snakes = []
@@ -85,10 +86,13 @@ class Game_State():
                 del self.players[snake]
             if (len(self.food) == 0):
                 self.spawn_food()
-            if (len(self.players) == 1):
-                # Last one staying wins
+            if (len(self.players) <= 1):
+                # Last one staying wins, or they both died
                 self.finished = True
-            
+
+    def get_winners(self):
+        return [s for s in self.players] if self.finished else []
+    
     def in_wall(self, head):
         x_collide = head[0] == 0 or head[0] == Game_State.width
         y_collide = head[1] == 0 or head[1] == Game_State.height
@@ -151,7 +155,7 @@ if (__name__ == "__main__"):
     gs.update()
     print(gs.to_JSON())
 
-    while True:
+    while not gs.finished:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -178,6 +182,6 @@ if (__name__ == "__main__"):
         gs.update()
         display(gs)
         clock.tick(16)
-    
+    print(gs.get_winners())
 
 

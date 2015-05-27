@@ -67,6 +67,25 @@ $(function() {
     });
     
     
+    $("#request-games-button").on("click", function(event){
+        try {
+            connection.send("request_games");
+        }
+        catch(error) {
+            console.log(error);
+        }
+    });
+    
+    
+    $("#request-scores-button").on("click", function(event){
+        try {
+            connection.send("request_scores");
+        }
+        catch(error) {
+            console.log(error);
+        }
+    });
+    
     // functions I've been using in the console that should be attatched to buttons
     /*
     
