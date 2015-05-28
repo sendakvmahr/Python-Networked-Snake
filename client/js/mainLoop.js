@@ -1,5 +1,5 @@
-define(["physics/Vector", "input/Button", "scene/MainScene", "input/InputHandler","lib/goody", "assets/vars"],
-function(Vector, Button, MainScene, InputHandler, goody, vars)
+define(["physics/Vector", "scene/MainScene", "input/InputHandler","lib/goody", "assets/vars"],
+function(Vector, MainScene, InputHandler, goody, vars)
 {
     function mainLoop() {
         this.canvas = document.getElementById('canvas');

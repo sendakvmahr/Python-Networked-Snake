@@ -1,0 +1,73 @@
+Milestone 2 - Done
+Sqlite Database 
+Login, Connection 
+Hashing done server side
+
+Milestone 3 - Done
+Coordination with multiplayers
+
+Milestone 4 - Done
+Game sessions
+	Handled, possible but minimal testing done
+	Game sessions are created using the create button
+Generally, disconnections are handled
+	Snakes simply travel in a straight line without control after their player disconnects. Bodies are deleted once snakes die. My reasoning was that if a player cannot beat a snake that charges towards the wall, then the disconnected player was at asuch an advantage before disconnecting they probably deserve to win.
+Score board - Win loss ratio recorded in serve
+	Display scores after connecting by clicking the "Scores" button.  
+
+
+
+IMPORTANT! #---------------------
+
+RUN CLIENT USING CHROME ONLY - Not compatible with Safari, safari does not have a built in startwith method for strings.
+
+END IMPORTANT! #-----------------
+
+
+Starting the Server
+	Start the server by running py_server.py in the server folder. Server uses Python 3.
+	Start the client by opening index.html in the client folder using Chrome. 
+	Every open instance of index.html counts as a client, so open index.html multiple times to test multiple clients. 
+
+
+Operating a client
+	Input the ip address of the server into the text form above the connect button. It is set to localhost by default.
+	Login using by entering a username and password, or by creating a new user with a new password. Created users will be logged in if their username and password can be created. At this moment, nothing will change in the interface if a user cannot be created/logged in - must rely on reading console of the server or assuming login/creation worked.
+	After logging in, games can be created and joined by entering a game name and the number of players in the game. Games can have up to 4 players. Players that create a game will automatically join a game, and existing games can be listed by clicking the "Games" button on the left. Games cannot be joined if they have reached the required number of players and have started, or if they do not exist. 
+	The player win/loss ratio can be accessed by pushing the "scores" button on the left. The database is automatically updated when a game ends. 
+    
+    Use wasd to move the snake.
+
+Script files that might be relevant have ~ in front of them
+Organization and Functionality
+    Server
+        Each .py file can be run individually for testing the functionality inside each module. snake_logic.py needs pygame to run
+        user_blank.db - a blank copy of the database, mainly used when I want to wipe the db for testing purposes
+        users.db - the sqlite database
+        ~py_server.py - contains logic for the server, client sockets, and management of networked snake games
+        ~snake_logic.py - contains. the logic for snake games.
+        ~database_handler.py - contains a class that handles database connections.
+        ~parsing.py - handles reading and writing messages to the socket and handshakes.
+    Client
+        css
+            reset.css - resets for browsers, I tend to simply prefer working with it to begin with
+        js
+            scene
+                ~MainScene.js - Mainly in control of rendering the Snake Game
+                Scene.js - Abstract class MainScene inherits from, originally used for multiple types of scenes
+                GameState.js - Holds variables that defined the state of the game as told by the server, is part of MianScene
+            assets
+                vars.js - Holds variables that will generally be important (example - fps, size of screen)
+                ~loader.js - loads images and only allows game to start when all assets are loaded, assigns functions to buttons that get form input and sends the appropriate message to the server
+            input
+                ~InputHandler.js - Gets keyboard input from the player and sends it to the server.
+            lib
+                goody.js - General grabbag of helper functions that are used in several files.
+                jquery - for getting input and selecting elements
+                require.js - lets me split up my code and organize it.
+            networking
+                ~connection.js - class where websocket is initialized. The this.socket.onmessage itself is altered in the start function that is called when the websocket is initialized, so none of the message handling is defined here.
+            physics
+                Not much is relevant here now as the client handles no physics. Will be relevant if I decide to do scene interpolation. 
+            ~mainLoop.js - Class that holds and manages InputHandler, MainScene, and generally holds and links important things.
+            ~main.js - Holds the start function that starts the game, redefines connection.socket.onmessage to handle messages to the client. 

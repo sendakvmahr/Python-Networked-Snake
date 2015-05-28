@@ -99,7 +99,8 @@ class Game_State():
         return x_collide or y_collide
 
     def update_player_direction(self, player, direction):
-        self.players[player].update_direction(direction)
+        if (player in self.players):
+            self.players[player].update_direction(direction)
 
     def spawn_food(self):
         # Extra calculations involving STEP_SIZE prevent food from spawning in borders

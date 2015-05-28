@@ -43,9 +43,12 @@ class Networked_Game(threading.Thread):
         SERVER.delete_game(self.name)        
             
     def join(self, player_name, socket):
+        if (self.started):
+            raise ValueError
         self.players[player_name] = socket
         if (self.num_players == len(self.players)):
             self._game_state = snake_logic.Game_State([p for p in self.players.keys()])
+            self.started = True
             self.start()
         print("{}.started = {}".format(self.name, self.started))
     def update_player_direction(self, username, direction):
@@ -68,10 +71,6 @@ class Client(threading.Thread):
         """Overwrites the Thread run function so it knows how to run"""
         while True:
             ### NOTES ON WHAT IS NOT IMPLEMENTED
-            # logged in - processing moves, though that has more to do wiht the client atm
-            # anyone - disconnections
-            # spectate option
-            # request_games shouldn't be there, server should update everyone on the state of the games when they change
             if (self.logged_in):
                 # User has finished handshake and logged in
                 # Either join / change movement / create game
@@ -79,20 +78,29 @@ class Client(threading.Thread):
                 response = ""
                 print(data)
                 if (data.startswith("create")):
-                    data = self._split_message(data)
-                    game_name = data[0]
-                    num_players = int(data[1])
-                    SERVER.add_game(game_name, num_players)
-                    SERVER.join(game_name, self._username, self.socket)
-                    self._game = SERVER.games[game_name]
+                    try:
+                        data = self._split_message(data)
+                        game_name = data[0]
+                        num_players = int(data[1])
+                        if (num_players > 1 and num_players < 5):
+                            SERVER.add_game(game_name, num_players)
+                            SERVER.join(game_name, self._username, self.socket)
+                            self._game = SERVER.games[game_name]
+                    except:
+                        # Player did not enter a number for number of players or left something blank
+                        pass
                 elif (data.startswith("dir") and self.is_in_game()):
                     self._game.update_player_direction(self._username, self._split_message(data)[0])
                 elif (data.startswith("join") and not self.is_in_game()):
-                    game_name = self._split_message(data)[0]
-                    joined = SERVER.join(game_name, self._username, self.socket)
-                    if joined:
-                        self._game = SERVER.games[game_name]
-                    response = str(self.is_in_game())
+                    try:
+                        game_name = self._split_message(data)[0]
+                        joined = SERVER.join(game_name, self._username, self.socket)
+                        if joined:
+                            self._game = SERVER.games[game_name]
+                        response = str(self.is_in_game())
+                    except:
+                        # Most likely they forgot to fill in a form
+                        pass
                 elif (data.startswith("request_games")):
                     response = "GAMES\t" + self.get_games()
                     self._send(response)
@@ -108,13 +116,21 @@ class Client(threading.Thread):
                 data = self._read_data()
                 response = ""
                 if (data.startswith("login")):
-                    userinfo = self._split_message(data)
-                    response = self._handle_login(userinfo[0], userinfo[1])
-                    print("LOGIN " + response + ": ", userinfo)
+                    try:
+                        userinfo = self._split_message(data)
+                        response = self._handle_login(userinfo[0], userinfo[1])
+                        print("LOGIN " + response + ": ", userinfo)
+                    except:
+                        # Most likely they forgot to fill in a form
+                        pass
                 elif (data.startswith("create")):
-                    userinfo = self._split_message(data)
-                    response = self._handle_create(userinfo[0], userinfo[1])
-                    print("CREATE " + response + ": ", userinfo)
+                    try:
+                        userinfo = self._split_message(data)
+                        response = self._handle_create(userinfo[0], userinfo[1])
+                        print("CREATE " + response + ": ", userinfo)
+                    except:
+                        # Most likely they forgot to fill in a form
+                        pass
                 elif (data.startswith("request_games")):
                     response = "GAMES\t" + self.get_games()
                 elif (data.startswith("request_scores")):
@@ -209,6 +225,10 @@ class Server:
             self.games[game_name].join(username, socket)
             return True
         except KeyError:
+            # Game does not exist
+            return False
+        except ValueError:
+            # Game has already started and has enough players
             return False
         
     def delete_game(self, game_name):
