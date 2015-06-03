@@ -5,7 +5,7 @@
         <meta content="utf-8" http-equiv="encoding">
         <link rel="stylesheet" href="css/reset.css">
         <link rel="shortcut icon" href="images/icon.png">
-        <title>Snake - Sorry for Debug Colors </title>
+        <title>Snake</title>
         <style>
             * {
                 margin: 0;
@@ -32,7 +32,6 @@
                 left: 13rem;
                 right: 0;
                 bottom: 6rem;
-                background: red;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -40,7 +39,6 @@
             }
             #information{
                 position: absolute;
-                background: blue;
                 width: 13rem;
                 left: 0;
                 top: 0;
@@ -52,13 +50,11 @@
                 left: 13rem;
                 right: 0;
                 height: 6rem;
-                background: green;
             }
 
             #initial-connection {
                 float: left;
                 height: 100%;
-                background: yellow;
             }
             #initial-connection input[type=text]{
                 display: block;
@@ -71,7 +67,6 @@
             #login {
                 float: left;
                 height: 100%;
-                background: red;
             }
             #login input[type=text]{
                 display: block;
@@ -89,7 +84,6 @@
             #join {
                 float: left;
                 height: 100%;
-                background: cyan;
             }
             
             #join input[type=text]{
@@ -105,7 +99,9 @@
                 float: right;
                 margin-right: .7rem;
             }
-
+            #info {
+                color: white;
+            }
         </style>
     </header> 
     
@@ -135,8 +131,8 @@
                 <input id="create-button" type="button" value="Create"></input>
             </form>
             <form id="join">
-                <input id="game_name" type="text" placeholder="Name of Game""></input>
-                <input id="player_num" type="text" placeholder="Number of Players""></input>
+                <input id="game_name" type="text" placeholder="Name of Game"></input>
+                <input id="player_num" type="text" placeholder="Number of Players"></input>
                 <input id="create-game-button" type="button" value="Create"></input>
                 <input id="join-game-button" type="button" value="Join"></input>
             </form>

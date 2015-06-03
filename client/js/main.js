@@ -34,8 +34,11 @@ function start(connection) {
                     $("#info").html(data);
                 }
                 else if (evt.data.startsWith("SCORES")) {
-                    var data = evt.data.replace("\t", ":<br/>").replace("[", "").replace("]", "").replace("\n", "<br/>");
+                    var data = evt.data.replace("\t", ":<br/>").replace("[", "").replace("]", "").replace(/\n/g, "<br/><br/>");
                     $("#info").html(data);
+                }
+                else {
+                    $("#info").html(evt.data);
                 }
                 try {
                     if (evt.data[0] == "{") {

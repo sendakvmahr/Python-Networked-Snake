@@ -86,9 +86,10 @@ class Client(threading.Thread):
                             SERVER.add_game(game_name, num_players)
                             SERVER.join(game_name, self._username, self.socket)
                             self._game = SERVER.games[game_name]
+                        self._send("CREATED")
                     except:
                         # Player did not enter a number for number of players or left something blank
-                        pass
+                        self._send("ERROR: CHECK FIELDS")
                 elif (data.startswith("dir") and self.is_in_game()):
                     self._game.update_player_direction(self._username, self._split_message(data)[0])
                 elif (data.startswith("join") and not self.is_in_game()):
@@ -97,10 +98,12 @@ class Client(threading.Thread):
                         joined = SERVER.join(game_name, self._username, self.socket)
                         if joined:
                             self._game = SERVER.games[game_name]
-                        response = str(self.is_in_game())
+                            self._send("JOINED")
+                        else:
+                            self._send("ERROR: CHECK FIELDS")
                     except:
                         # Most likely they forgot to fill in a form
-                        pass
+                         self._send("ERROR: CHECK FIELDS")
                 elif (data.startswith("request_games")):
                     response = "GAMES\t" + self.get_games()
                     self._send(response)
