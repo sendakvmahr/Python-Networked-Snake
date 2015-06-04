@@ -1,0 +1,2 @@
+Extra credit - 
+	Place entire project into apache's htdocs before starting the client to access the high scores page.

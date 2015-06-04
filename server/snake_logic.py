@@ -70,12 +70,12 @@ class Game_State():
             # Move snakes
             for snake in self.players.values():
                 snake.update(Game_State.step_size)
-                tails += snake.get_draw_tails()
+                tails += list((x[0], x[1]) for x in snake.tail)
             # Check to see if snake heads are in anything
             # Really lazy collision detection - everything is done in multiples of 10
             for snake in self.players.values():
                 head = snake.get_head()
-                if ((head in tails)) or (self.in_wall(head)):
+                if ((tuple(head) in tails)) or (self.in_wall(head)):
                     # Snake hit a tail or wall, is dead
                     dead_snakes.append(snake.player)
                 elif (head in self.food):
